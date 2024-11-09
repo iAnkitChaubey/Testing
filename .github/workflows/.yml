@@ -10,12 +10,13 @@ on:
 jobs:
   run-bot:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Set up Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
         with:
           python-version: '3.8'
 
@@ -23,6 +24,9 @@ jobs:
         run: |
           pip install -r requirements.txt
 
-      - name: Run bot
+      - name: Run bot for 5 minutes
         run: |
-          python bot.py
+          python bot.py &
+          BOT_PID=$!         # Save bot process ID
+          sleep 300          # Run for 5 minutes (300 seconds)
+          kill $BOT_PID      # Stop the bot after 5 minutes
