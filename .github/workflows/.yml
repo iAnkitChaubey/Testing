@@ -1,44 +1,39 @@
-name: Run Bot
+name: Auto Start Bot on Push
 
+# Start the workflow on push to the main branch
 on:
   push:
     branches:
-      - main
-  workflow_dispatch:
-  schedule:
-    - cron: "0 * * * *"  # Runs every hour; modify as needed
+      - main  # Adjust if you want a different branch
 
 jobs:
   run-bot:
     runs-on: ubuntu-latest
-    timeout-minutes: 60  # Automatically stops after 1 hour
+    timeout-minutes: 5  # Automatically stop the bot after 1 hour
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.9'  # Adjust version as needed
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'  # Use the required Python version
 
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
 
-    - name: Run the bot
-      env:
-        API_ID: ${{ secrets.API_ID }}
-        API_HASH: ${{ secrets.API_HASH }}
-        BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
-        ADMIN: ${{ secrets.ADMIN }}
-        CAPTION: ${{ secrets.CAPTION }}
-      run: |
-        python bot.py  # Replace with your bot's main file
+      - name: Run the bot
+        # The .env file should already be in the repository
+        run: |
+          python bot.py  # Replace `bot.py` with your bot's main file
 
-    - name: Cleanup Files and Cache
-      if: always()
-      run: |
-        rm -rf *           # Clears all files in the current working directory
-        rm -rf /tmp/*      # Clears temp files
+      # Force cleanup after the run, including if the job is canceled
+      - name: Force Cleanup Files and Cache
+        if: always()  # Ensure this runs even if the job is canceled
+        run: |
+          rm -rf *                         # Remove all files and directories in the workspace
+          rm -rf /tmp/*                    # Clear temp files if any
+          find . -type f -size +500k -delete  # Extra safeguard: delete remaining files larger than 500KB
