@@ -1,50 +1,49 @@
-name: Auto Start Bot on Push
+name: Bot Automation Workflow
 
 on:
   push:
     branches:
-      - main
-    paths:
-      - 'start.txt'
+      - main  # This will trigger the workflow when changes are pushed to the 'main' branch
+  workflow_dispatch:  # This allows manual triggering of the workflow
 
 jobs:
-  run-bot:
+  build:
     runs-on: ubuntu-latest
-    timeout-minutes: 5  # Increase timeout if needed
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v2
 
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.9'
+          python-version: 3.9
 
       - name: Install dependencies
         run: |
-          python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Debugging Info
-        run: |
-          echo "Current Directory: $(pwd)"
-          echo "Listing Files: $(ls -l)"
-          echo "Secrets are set up properly."
-      
-      - name: Run the bot
-        env:
-          API_ID: ${{ secrets.API_ID }}
-          API_HASH: ${{ secrets.API_HASH }}
-          BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
-          ADMIN: ${{ secrets.ADMIN }}
-          CAPTION: ${{ secrets.CAPTION }}
+      - name: Run bot.py
         run: |
           python bot.py  # Replace `bot.py` with your bot's main file
 
-      - name: Force Cleanup Files and Cache
-        if: always()
+      - name: Clean specific temp files and large files
         run: |
-          rm -rf *                         
-          rm -rf /tmp/*                    
-          find . -type f -size +500k -delete
+          # Clean specific directories related to the bot
+          rm -rf /home/runner/work/Testing/Testing/temp/* || true
+
+          # Remove large files (over 500k) safely
+          find . -type f -size +500k -exec rm -f {} \; || true
+
+      - name: Post job cleanup
+        run: |
+          # Additional cleanup steps if needed
+          rm -rf /tmp/* || true  # Avoid cleaning system-critical files, only target temp files you control
+          find . -type f -size +500k -exec rm -f {} \; || true
+
+      - name: Git config and cleanup
+        run: |
+          git version
+          git config --global --add safe.directory /home/runner/work/Testing/Testing
+          git config --local --unset-all core.sshCommand
+          git config --local --unset-all http.https://github.com/.extraheader
