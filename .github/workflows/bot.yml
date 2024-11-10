@@ -10,7 +10,7 @@ on:
 jobs:
   run-bot:
     runs-on: ubuntu-latest
-    timeout-minutes: 120  # Increase timeout if needed
+    timeout-minutes: 5  # Increase timeout if needed
 
     steps:
       - name: Checkout code
