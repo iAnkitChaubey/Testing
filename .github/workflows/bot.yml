@@ -1,17 +1,16 @@
 name: Auto Start Bot on Push
 
-# Start the workflow only when 'start.txt' is pushed to the main branch
 on:
   push:
     branches:
-      - main  # Adjust if you want a different branch
+      - main
     paths:
-      - 'start.txt'  # Trigger only when the 'start.txt' file is changed
+      - 'start.txt'
 
 jobs:
   run-bot:
     runs-on: ubuntu-latest
-    timeout-minutes: 60  # Automatically stop the bot after 1 hour
+    timeout-minutes: 120  # Increase timeout if needed
 
     steps:
       - name: Checkout code
@@ -20,13 +19,19 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.9'  # Use the required Python version
+          python-version: '3.9'
 
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
+      - name: Debugging Info
+        run: |
+          echo "Current Directory: $(pwd)"
+          echo "Listing Files: $(ls -l)"
+          echo "Secrets are set up properly."
+      
       - name: Run the bot
         env:
           API_ID: ${{ secrets.API_ID }}
@@ -37,10 +42,9 @@ jobs:
         run: |
           python bot.py  # Replace `bot.py` with your bot's main file
 
-      # Force cleanup after the run, including if the job is canceled
       - name: Force Cleanup Files and Cache
-        if: always()  # Ensure this runs even if the job is canceled
+        if: always()
         run: |
-          rm -rf *                         # Remove all files and directories in the workspace
-          rm -rf /tmp/*                    # Clear temp files if any
-          find . -type f -size +500k -delete  # Extra safeguard: delete remaining files larger than 500KB
+          rm -rf *                         
+          rm -rf /tmp/*                    
+          find . -type f -size +500k -delete
