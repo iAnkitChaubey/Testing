@@ -23,14 +23,21 @@ jobs:
         run: |
           pip install -r requirements.txt
 
-      - name: Run bot.py
+      - name: Run bot.py with a timeout (in minutes)
         env:
           API_ID: ${{ secrets.API_ID }}
           API_HASH: ${{ secrets.API_HASH }}
           BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
           ADMIN: ${{ secrets.ADMIN }}
         run: |
-          python bot.py  # Replace `bot.py` with your bot's main file
+          # Set timeout duration in minutes
+          TIMEOUT_MINUTES=5  # Set this value to the desired number of minutes
+          
+          # Convert minutes to seconds
+          TIMEOUT_SECONDS=$((TIMEOUT_MINUTES * 60))
+
+          # Run bot.py with the calculated timeout
+          timeout $TIMEOUT_SECONDS python bot.py  # Run bot.py with the timeout in seconds
 
       - name: Clean specific temp files and large files
         run: |
