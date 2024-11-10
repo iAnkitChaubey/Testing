@@ -4,29 +4,41 @@ on:
   push:
     branches:
       - main
+  workflow_dispatch:
   schedule:
-    - cron: "0 * * * *"  # Runs every hour; adjust as needed
+    - cron: "0 * * * *"  # Runs every hour; modify as needed
 
 jobs:
   run-bot:
     runs-on: ubuntu-latest
+    timeout-minutes: 60  # Automatically stops after 1 hour
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+    - name: Checkout code
+      uses: actions/checkout@v3
 
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.8'
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'  # Adjust version as needed
 
-      - name: Install dependencies
-        run: |
-          pip install -r requirements.txt
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
 
-      - name: Run bot for 5 minutes
-        run: |
-          python bot.py &
-          BOT_PID=$!         # Save bot process ID
-          sleep 300          # Run for 5 minutes (300 seconds)
-          kill $BOT_PID      # Stop the bot after 5 minutes
+    - name: Run the bot
+      env:
+        API_ID: ${{ secrets.API_ID }}
+        API_HASH: ${{ secrets.API_HASH }}
+        BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
+        ADMIN: ${{ secrets.ADMIN }}
+        CAPTION: ${{ secrets.CAPTION }}
+      run: |
+        python bot.py  # Replace with your bot's main file
+
+    - name: Cleanup Files and Cache
+      if: always()
+      run: |
+        rm -rf *           # Clears all files in the current working directory
+        rm -rf /tmp/*      # Clears temp files
