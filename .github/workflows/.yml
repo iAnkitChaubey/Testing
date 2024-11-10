@@ -11,7 +11,7 @@ on:
 jobs:
   run-bot:
     runs-on: ubuntu-latest
-    timeout-minutes: 5  # Automatically stop the bot after 1 hour
+    timeout-minutes: 60  # Automatically stop the bot after 1 hour
 
     steps:
       - name: Checkout code
@@ -28,6 +28,12 @@ jobs:
           pip install -r requirements.txt
 
       - name: Run the bot
+        env:
+          API_ID: ${{ secrets.API_ID }}
+          API_HASH: ${{ secrets.API_HASH }}
+          BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
+          ADMIN: ${{ secrets.ADMIN }}
+          CAPTION: ${{ secrets.CAPTION }}
         run: |
           python bot.py  # Replace `bot.py` with your bot's main file
 
