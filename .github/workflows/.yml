@@ -1,10 +1,12 @@
 name: Auto Start Bot on Push
 
-# Start the workflow on push to the main branch
+# Start the workflow only when 'start.txt' is pushed to the main branch
 on:
   push:
     branches:
       - main  # Adjust if you want a different branch
+    paths:
+      - 'start.txt'  # Trigger only when the 'start.txt' file is changed
 
 jobs:
   run-bot:
@@ -26,7 +28,6 @@ jobs:
           pip install -r requirements.txt
 
       - name: Run the bot
-        # The .env file should already be in the repository
         run: |
           python bot.py  # Replace `bot.py` with your bot's main file
 
